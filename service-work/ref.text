@@ -1,3 +1,35 @@
+
+开启本地非安全调试模式
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome —user-data-dir=/tmp/foo —ignore-certificate-errors —unsafely-treat-insecure-origin-as-secure=https://cc.logicmonitor.com
+
+
+参考:
+页面守护者：Service Worker
+http://imweb.io/topic/56592b8a823633e31839fc01
+
+
+Caching Files with Service Worker
+https://developers.google.com/web/ilt/pwa/caching-files-with-service-worker
+
+Mozilla SSL Configuration Generator
+https://mozilla.github.io/server-side-tls/ssl-config-generator/
+
+
+使用 Service Workers
+https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API/Using_Service_Workers
+
+深入了解 Service Worker ，看这篇就够了
+https://zhuanlan.zhihu.com/p/27264234
+
+Q & A
+1. Service Worker主要作用
+
+
+2. 为什么要分install和active
+通常来讲，需要在 activate 的 callback 中进行 cache 管理，来清理老的 cache。我们在 activate 而不是 install 的时候进行的原因，
+是如果我们在 install 的时候进行清理，那么老的 service worker 仍然在控制页面，他们依赖的缓存就失效了，因此就会突然被停止。
+
+3.
 Q: navigator.serviceWorker.controller is null until page refresh
 A: https://stackoverflow.com/questions/38168276/navigator-serviceworker-controller-is-null-until-page-refresh
 self.addEventListener('install', function(event) {
@@ -8,4 +40,99 @@ self.addEventListener('activate', function(event) {
     event.waitUntil(self.clients.claim()); // Become available to all pages
 });
 
+4. caches, 为什么所有文件都会被match?
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(function(response) {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
 
+        return fetch(event.request);
+      }
+    )
+  );
+});
+
+
+caches.match(event.request) 允许我们对网络请求的资源和 cache 里可获取的资源进行匹配，查看是否缓存中有相应的资源。这个匹配通过 url 和 vary header进行，就像正常的 http 请求一样。
+
+5. Response
+new Response('Hello from your friendly neighbourhood service worker!');
+
+new Response('<p>Hello from your friendly neighbourhood service worker!</p>', {
+  headers: { 'Content-Type': 'text/html' }
+})
+https://developer.mozilla.org/zh-CN/docs/Web/API/Response
+
+
+5.5 Request
+https://developer.mozilla.org/zh-CN/docs/Web/API/Request
+
+
+6. fetch
+https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API
+
+7. 如何更新一个 Service Worker
+
+更新你 service worker 的 JavaScript 文件
+当用户浏览你的网站时，浏览器尝试在后台重新下载 service worker 的脚本文件。经过对比，只要服务器上的文件和本地文件有一个字节不同，这个文件就认为是新的。
+
+之后更新后的 service worker 启动并触发 install 事件。
+
+此时，当前页面生效的依然是老版本的 service worker，新的 service worker 会进入 “waiting” 状态。
+
+当页面关闭之后，老的 service worker 会被干掉，新的 servicer worker 接管页面
+一旦新的 service worker 生效后会触发 activate 事件。
+
+8. service worker scope
+每次任何被 service worker 控制的资源被请求到时，都会触发 fetch 事件，这些资源包括了指定的 scope 内的文档，
+和这些文档内引用的其他任何资源（比如 index.html 发起了一个跨域的请求来嵌入一个图片，这个也会通过 service worker 。）
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw-test/sw.js', { scope: '/sw-test/' }).then(function(reg) {
+    // registration worked
+    console.log('Registration succeeded. Scope is ' + reg.scope);
+  }).catch(function(error) {
+    // registration failed
+    console.log('Registration failed with ' + error);
+  });
+}
+
+scope 参数是选填的，可以被用来指定你想让 service worker 控制的内容的子目录。 在这个例子例，我们指定了 '/sw-test/'，
+表示 app 的 origin 下的所有内容。如果你留空的话，默认值也是这个值， 我们在指定只是作为例子。
+
+这就注册了一个 service worker，它工作在 worker context，所以没有访问 DOM 的权限。在正常的页面之外运行 service worker 的代码来控制它们的加载。
+
+单个 service worker 可以控制很多页面。每个你的 scope 里的页面加载完的时候，安装在页面的 service worker 可以控制它。牢记你需要小心 service worker 脚本里的全局变量： 每个页面不会有自己独有的worker。
+
+
+9. 可不可以跑多个Service worker
+
+10. event.waitUntil() vs event.skipWaiting()
+
+11. event.waitUntil() vs self.clients.claim()
+
+12. 缓存在哪里
+
+13.  Service worker 规范中提到的 "service workers may be started and killed many times a second"，指的是 service worker 线程随时可以被 Started 和 Killed。
+在关联文档未关闭时，Service worker 线程可以处于 Stopped 状态。在全部关联文档都已关闭时，service worker 线程也可以处于 Running 状态。
+
+Service worker 脚本版本的状态，也是独立于文档生命周期的，与 service worker 线程的运行状态无关，service worker 线程关闭时，service worker 脚本版本也可处于 ACTIVATED 状态。
+Service worker 脚本版本的状态，INSTALLED 和 ACTIVATED 是稳定的状态，service worker 线程启动之后一般是进入这两种状态之一。INSTALLING 和 ACTIVATING 是中间状态，
+一般只会在 service worker 新注册或更新时触发一次，刷新页面一般不会触发。
+INSTALLING 成功就转入 INSTALLED，失败就转入 REDUNDANT。ACTIVATING 成功就转入 ACTIVATED，失败就转入 REDUNDANT。
+如果 service worker 脚本版本处于 ACTIVATED 状态，功能事件处理完之后，service worker 线程会被 Stop，当再次有功能事件时，service worker 线程又会被 Start，
+Start 完成后 service worker 就可以立即进入 ACTIVATED 状态。
+
+14. Google 团队推出了 Progressive Web Apps
+Notification
+Add To Home Screen
+Instant Loading
+Fast
+Responsive
+Secure
+
+https://developers.google.com/web/ilt/pwa/
