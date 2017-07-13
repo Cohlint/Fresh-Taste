@@ -21,6 +21,21 @@ https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API/Using_Servic
 深入了解 Service Worker ，看这篇就够了
 https://zhuanlan.zhihu.com/p/27264234
 
+FetchEvent.respondWith()
+https://developer.mozilla.org/zh-CN/docs/Web/API/FetchEvent/respondWith
+
+Cache
+https://developer.mozilla.org/zh-CN/docs/Web/API/Cache
+
+WorkerGlobalScope.importScripts()
+https://developer.mozilla.org/zh-CN/docs/Web/API/WorkerGlobalScope/importScripts
+
+Body
+https://developer.mozilla.org/zh-CN/docs/Web/API/Body
+
+Modifying responses in Service Worker requests
+http://craig-russell.co.uk/2016/01/26/modifying-service-worker-responses.html#.WVyVV9OGOH4
+
 Q & A
 1. Service Worker主要作用
 
