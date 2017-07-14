@@ -1,0 +1,7 @@
+webpack2 vs webpack1
+http://lucyhao.com/2017/04/19/webpack2%20vs%20webpack1/
+
+tree tracking
+上面关于的square的函数有一个说明，它在任何地方都没有使用，当打包环境是process.env.NODE_ENV = “production”的时候，我们看下bundle.js还会打包进这个square函数吗？
+只有cube函数打包进去了。square没有打包进去，tree shaking!! 题外话：关于这个tree shaking名字，据说是因为我们可以把application看成是一颗tree，
+application中的export看成是the branches of the tree，当你摇这颗树的时候，那些死的树枝就会掉落。所以当我们打包这个application的时候，那些没有用的export都不应该打包进去。
