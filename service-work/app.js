@@ -1,8 +1,21 @@
 //chrome://inspect/#service-workers
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').then(function(registration) {
+    navigator.serviceWorker.register('./sw.js', {insecure: true}).then(function(registration) {
+        if(!registration.installing) return;
+        console.log("There is a ServiceWorker installing");
         // Registration was successful
         console.log('ServiceWorker registration successful with scope: ',    registration.scope);
+
+        var worker = registration.installing;
+        worker.addEventListener('statechange', function() {
+            if(worker.state === 'redundant') {
+                console.log('Install failed');
+            }
+            if(worker.state === 'installed') {
+                console.log('Install successful!');
+            }
+        });
+
     }).catch(function(err) {
         // registration failed :(
         console.log('ServiceWorker registration failed: ', err);

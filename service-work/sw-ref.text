@@ -38,6 +38,7 @@ http://craig-russell.co.uk/2016/01/26/modifying-service-worker-responses.html#.W
 
 Q & A
 1. Service Worker主要作用
+离线缓存
 
 
 2. 为什么要分install和active
