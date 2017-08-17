@@ -3,7 +3,64 @@
 /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome —user-data-dir=/tmp/foo —ignore-certificate-errors —unsafely-treat-insecure-origin-as-secure=https://cc.logicmonitor.com
 
 
+几个新对象
+Response
+https://developer.mozilla.org/zh-CN/docs/Web/API/Response
+new Response('Hello from your friendly neighbourhood service worker!');
+new Response('<p>Hello from your friendly neighbourhood service worker!</p>', {
+  headers: { 'Content-Type': 'text/html' }
+})
+
+Request
+https://developer.mozilla.org/zh-CN/docs/Web/API/Request
+
+Headers
+https://developer.mozilla.org/zh-CN/docs/Web/API/Headers
+
+Body
+https://developer.mozilla.org/zh-CN/docs/Web/API/Body
+
+
+https://developer.mozilla.org/zh-CN/docs/Web/API/WorkerGlobalScope
+WorkerGlobalScope: {
+//Standard properties
+caches: CacheStorage, //https://developer.mozilla.org/zh-CN/docs/Web/API/Cache
+navigator: WorkerNavigator,
+self: WorkerGlobalScope,
+location: WorkerLocation,
+
+//Non-standard properties
+performance: WorkerPerformance,
+console: Console,
+
+//Event Handlers
+onerror,
+onoffline,
+ononline,
+onlanguagechange,
+onclose,
+
+//Standard methods
+WorkerGlobalScope.close(),
+WorkerGlobalScope.importScripts(),
+
+//Methods implemented from elsewhere
+WindowBase64.atob(),
+WindowBase64.btoa(),
+WindowTimers.clearInterval(),
+WindowTimers.clearTimeout(),
+ImageBitmapFactories.createImageBitmap(),
+GlobalFetch.fetch(), //https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API
+WindowTimers.setInterval(),
+WindowTimers.setTimeout()
+}
+
+
+
 参考:
+How to Send Messages Between Service Workers and Clients
+http://craig-russell.co.uk/2016/01/29/service-worker-messaging.html#.WYM0mtOGPSf
+
 页面守护者：Service Worker
 http://imweb.io/topic/56592b8a823633e31839fc01
 
@@ -14,32 +71,31 @@ https://developers.google.com/web/ilt/pwa/caching-files-with-service-worker
 Mozilla SSL Configuration Generator
 https://mozilla.github.io/server-side-tls/ssl-config-generator/
 
-
-使用 Service Workers
-https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API/Using_Service_Workers
-
-深入了解 Service Worker ，看这篇就够了
-https://zhuanlan.zhihu.com/p/27264234
-
 FetchEvent.respondWith()
 https://developer.mozilla.org/zh-CN/docs/Web/API/FetchEvent/respondWith
 
-Cache
-https://developer.mozilla.org/zh-CN/docs/Web/API/Cache
-
-WorkerGlobalScope.importScripts()
-https://developer.mozilla.org/zh-CN/docs/Web/API/WorkerGlobalScope/importScripts
-
-Body
-https://developer.mozilla.org/zh-CN/docs/Web/API/Body
 
 Modifying responses in Service Worker requests
 http://craig-russell.co.uk/2016/01/26/modifying-service-worker-responses.html#.WVyVV9OGOH4
 
+
+
+Service Workers 初体验
+https://www.w3ctrain.com/2016/09/17/service-workers-note/
+
+Modifying responses in Service Worker requests
+http://craig-russell.co.uk/2016/01/26/modifying-service-worker-responses.html#.WYM0jtOGPSf
+
+
+网站渐进式增强体验(PWA)改造：Service Worker 应用详解
+https://lzw.me/a/pwa-service-worker.html
+
+
 Q & A
 1. Service Worker主要作用
+proxy
 离线缓存
-
+通知
 
 2. 为什么要分install和active
 通常来讲，需要在 activate 的 callback 中进行 cache 管理，来清理老的 cache。我们在 activate 而不是 install 的时候进行的原因，
@@ -75,21 +131,6 @@ self.addEventListener('fetch', function(event) {
 
 caches.match(event.request) 允许我们对网络请求的资源和 cache 里可获取的资源进行匹配，查看是否缓存中有相应的资源。这个匹配通过 url 和 vary header进行，就像正常的 http 请求一样。
 
-5. Response
-new Response('Hello from your friendly neighbourhood service worker!');
-
-new Response('<p>Hello from your friendly neighbourhood service worker!</p>', {
-  headers: { 'Content-Type': 'text/html' }
-})
-https://developer.mozilla.org/zh-CN/docs/Web/API/Response
-
-
-5.5 Request
-https://developer.mozilla.org/zh-CN/docs/Web/API/Request
-
-
-6. fetch
-https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API
 
 7. 如何更新一个 Service Worker
 
@@ -152,3 +193,105 @@ Responsive
 Secure
 
 https://developers.google.com/web/ilt/pwa/
+
+15. skipWaiting
+The ServiceWorkerGlobalScope.skipWaiting() method of the ServiceWorkerGlobalScope forces the waiting service worker to become the active service worker.
+
+This method can be used with Clients.claim() to ensure that updates to the underlying service worker take effect immediately for both the current client and all other active clients.
+
+ServiceWorkerGlobalScope.skipWaiting().then(function() {
+  //Do something
+});
+
+The following example causes a new version of a registered Service Worker to replace an existing one that is already installed, and replace the currently active worker on open pages.
+self.addEventListener('install', function(event) {
+  event.waitUntil(self.skipWaiting());
+});
+self.addEventListener('activate', function(event) {
+  event.waitUntil(self.clients.claim());
+});
+
+
+--------
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
+    Promise.all(
+      caches.keys().then(cacheNames => {
+        return cacheNames.map(name => {
+          if (name !== cacheStorageKey) {
+            return caches.delete(name)
+          }
+        })
+      })
+    ).then(() => {
+      return self.clients.claim()
+    })
+  )
+})
+在新安装的 Service Worker 中通过调用 self.clients.claim() 取得页面的控制权, 这样之后打开页面都会使用版本更新的缓存。旧的 Service Worker 脚本不再控制着页面之后会被停止。
+
+-----
+Service Worker 从注册开始需要先 install, 如果 install 成功, 接下来需要 activate, 然后才能接管页面。但是如果页面被先前的 Service Worker 控制着,
+那么它会停留在 installed(waiting) 这个阶段等到页面重新打开才会接管页面, 或者可以通过调用 self.skipWaiting() 方法跳过等待。所以一个 Service Worker 脚本的生命周期有这样一些阶段(从左往右): sw图3
+
+parsed: 注册完成, 脚本解析成功, 尚未安装
+installing: 对应 Service Worker 脚本 install 事件执行, 如果事件里有 event.waitUntil() 则会等待传入的 Promise 完成才会成功
+installed(waiting): 页面被旧的 Service Worker 脚本控制, 所以当前的脚本尚未激活。可以通过 self.skipWaiting() 激活新的 Service Worker
+activating: 对应 Service Worker 脚本 activate 事件执行, 如果事件里有 event.waitUntil() 则会等待这个 Promise 完成才会成功。这时可以调用 Clients.claim() 接管页面
+activated: 激活成功, 可以处理 fetch, message 等事件
+redundant: 安装失败, 或者激活失败, 或者被新的 Service Worker 替代掉
+
+Service Worker 脚本最常用的功能是截获请求和缓存资源文件, 这些行为可以绑定在下面这些事件上:
+
+install 事件中, 抓取资源进行缓存
+activate 事件中, 遍历缓存, 清除过期的资源
+fetch 事件中, 拦截请求, 查询缓存或者网络, 返回请求的资源
+
+
+16. 有一些常用的资源缓存的策略, 比如在 sw-toolbox 当中定义的有几种:
+
+网络优先: 从网络获取, 失败或者超时再尝试从缓存读取
+缓存优先: 从缓存获取, 缓存插叙不到再尝试从网络抓取
+最快: 同时查询缓存和网络, 返回最先拿到的
+仅限网络: 仅从网络获取
+仅限缓存: 仅从缓存获取
+
+17. Cache 对象受到 CacheStorage 的管理，在 W3C 规范中，CacheStorage 对应到内核的 ServiceWorkerCacheStorage 对象。
+任何一个域名（比如，origin: https://chaoshi.m.tmall.com/）只会创建一个 ServiceWorkerCacheStorage 对象。Cache 不会过期，只能显式删除.
+
+同一域名下的 ServiceWorkerCacheStorage 都放在同一目录，目录路径 storage_path: /data/data/com.UCMobile/app_core_ucmobile/Service Worker/CacheStorage/8f9fa7c394456a3f75c7c0aca39d897179ba4003。
+其中8f9fa7c394456a3f75c7c0aca39d897179ba4003 是 origin（https://chaoshi.m.tmall.com/）的 hash 值。
+
+前端从这些情况可以得到哪些信息呢？资源的存储不是按照资源的域名处理的，而是按照 Service Worker 的 origin 来处理，所以 Cache 的资源是无法跨域共享的，意思就是说，不同域的 Service Worker 无法共享使用对方的 Cache，
+即使是 Foreign Cache 请求的跨域资源，同样也是存放在这个 origin 之下。因为 ServiceWorkerCache 通过 cacheName 标记缓存版本，所以就会存在多个版本的 ServiceWorkerCache 资源。
+
+18 .Service worker 注册函数中指定的 scriptURL（比如 serviceworker.js），一般有两种更新方式：
+1) 强制更新: 距离上一次更新检查已超过 24 小时，会忽略浏览器缓存，强制到服务器更新一次。
+2) 检查更新
+一般在下面情况会检查更新,
+
+第一次访问 scope 里的页面。
+距离上一次更新检查已超过 24 小时。
+有功能性事件发生，比如 push、sync。
+在 service worker URL 发生变化时调用了 register 方法。
+Service worker JS 资源文件的缓存时间已超出其头部的 max-age 设置的时间（注：max-age 大于 24 小时，会使用 24 小时作为其值）。
+Service worker JS 资源文件的代码只要有一个字节发生了变化，就会触发更新，包括其引入的脚本发生了变化。
+
+19. what's root path.
+var CACHE_FILES = [ // 需要缓存的页面文件
+    '/',
+    './service-work.html',
+    './app.js',
+    './app.css',
+    //'./js/cache-test.js'
+];
+
+参考:
+解锁缓存新姿势——更灵活的
+Cache: https://zhuanlan.zhihu.com/p/27586862
+
+使用 Service Workers:
+https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API/Using_Service_Workers
+
+深入了解 Service Worker ，看这篇就够了
+https://zhuanlan.zhihu.com/p/27264234

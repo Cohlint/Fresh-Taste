@@ -1,10 +1,12 @@
 importScripts('js/cache-polyfill.js'); // cache 扩展
 
-var CACHE_NAME = 'app-v1'; // 缓存文件的版本
+var CACHE_NAME = 'app-v22'; // 缓存文件的版本
 var CACHE_FILES = [ // 需要缓存的页面文件
     '/',
+    './service-work.html',
     './app.js',
-    './app.css'
+    './app.css',
+    //'./js/cache-test.js'
 ];
 
 self.addEventListener('install', function (event) { // 监听worker的install事件
