@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raphael Test</title>
+</head>
+<body>
+<div id="my-canvas" style="width:10px;height: 10px;position: fixed; left:20px;top:20px;z-index: 0">
+</div>
+
+<script src="raphael.min.js"></script>
+<script>
+    // Creates canvas 320 × 200 at 10, 50
+    var paper = Raphael(0, 0, 1000, 1000);
+
+    // Creates circle at x = 50, y = 40, with radius 10
+    var circle = paper.circle(150, 150, 50);
+    // Sets the fill attribute of the circle to red (#f00)
+    circle.attr("fill", "#f00");
+
+    // Sets the stroke attribute of the circle to white
+    circle.attr("stroke", "#fff");
+
+
+    var pager2 = Raphael("my-canvas", 400, 400);
+    var cir = pager2.circle(30, 30, 10);
+    var coloredCircle = pager2.circle(55, 45, 20).attr({
+        "fill": "#17A9C6",
+        "stroke": "#2A6570",
+        "stroke-width": 2
+    });
+    var rect = pager2.rect(65, 65, 120, 80).attr({
+        "fill": "#17A9C6", //filling with background color
+        "stroke": "#2A6570", // border color of the rectangle
+        "stroke-width": 2 // the width of the border
+    });
+    var rect1 = pager2.rect(190, 65, 120, 80,20).attr({
+        "fill": "#17A9C6", //filling with background color
+        "stroke": "#2A6570", // border color of the rectangle
+        "stroke-width": 2 // the width of the border
+    });
+
+    var ellipse = paper.ellipse(300,300,170,100).attr({
+
+        "fill":"green", // background color of the ellipse
+
+        "stroke":"#2A6570", // ellipse's border color
+        "stroke-width":2 // border width
+
+    });
+
+    var tri = paper.path("M10,10L36,10L23,28L10,10").attr({
+
+        "fill":"pink", // filling the background color
+        "stroke":"#2A6570", // the color of the border
+        "stroke-width":2 // the size of the border
+
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raphael Test</title>
+</head>
+<body>
+<div id="my-canvas" style="width:10px;height: 10px;position: fixed; left:20px;top:20px;z-index: 0">
+</div>
+
+<script src="raphael.min.js"></script>
+<script>
+    var paper = Raphael("my-canvas", 650, 400);
+    var rect = paper.rect(20, 20, 60, 40).attr({
+        "stroke": "yellow", // border color of the rectangle
+    });
+    var rect1 = paper.rect(20, 90, 60, 40, 20).attr({
+        "stroke": "yellow", // border color of the rectangle
+    });
+    var rect2 = paper.rect(90, 20, 60, 40, 5).attr({
+        "stroke": "yellow", // border color of the rectangle
+    });
+    var rect3 = paper.rect(90, 90, 60, 40, 5).attr({
+        "stroke": "yellow", // border color of the rectangle
+    });
+    var cir = paper.circle(200, 100, 30);
+    var cir1 = paper.circle(250, 100, 20);
+    var cir2 = paper.circle(280, 100, 10);
+    var raphaelSet = paper.set();
+    raphaelSet.push(rect, rect1, rect2, rect3);
+    raphaelSet.splice(2, 1, cir, cir1, cir2);
+    raphaelSet.forEach(function(ele){
+        ele.attr({
+            "fill": "red"
+        });
+        console.log(ele[0]);
+    })
+</script>
+</body>
+</html>

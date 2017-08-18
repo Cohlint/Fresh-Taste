@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raphael Test</title>
+</head>
+<body>
+<div id="my-canvas" style="width:10px;height: 10px;position: fixed; left:20px;top:20px;z-index: 0">
+</div>
+
+<script src="raphael.min.js"></script>
+<script>
+    var paper = Raphael("my-canvas", 650, 400);
+    var rect = paper.rect(20, 20, 60, 40).attr({
+        "fill": "green",
+        "stroke": "red" // border color of the rectangle
+    });
+    rect.click(function(){
+        alert("hahah!");
+    });
+    // rect.mouseover(function(){
+    //	alert("wow");
+    //	});
+</script>
+</body>
+</html>

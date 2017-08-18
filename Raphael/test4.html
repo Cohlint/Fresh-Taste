@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raphael Test</title>
+</head>
+<body>
+<div id="my-canvas" style="width:10px;height: 10px;position: fixed; left:20px;top:20px;z-index: 0">
+</div>
+
+<script src="raphael.min.js"></script>
+<script>
+    var paper = Raphael("my-canvas", 650, 400);
+    var rect = paper.rect(20, 20, 60, 40).attr({
+        "stroke": "red"// border color of the rectangle
+    });
+    var rect1 = paper.rect(20, 70, 60, 40, 20).attr({
+        "stroke": "yellow"// border color of the rectangle
+    });
+    var rect2 = paper.rect(20, 20, 60, 40).attr({
+        "stroke": "red"// border color of the rectangle
+    }).transform("r90t100,0");
+    var rect3 = paper.rect(20, 70, 60, 40, 20).attr({
+        "stroke": "yellow"// border color of the rectangle
+    }).transform("r90T100,0");
+    console.log("第一个矩形坐标是：(" + rect.attr('x') + "," + rect.attr('y') + ")");
+    console.log("第三个矩形坐标是：(" + rect2.attr('x') + "," + rect2.attr('y') + ")");
+    console.log("第三个矩形的转换属性是："+rect2.transform());
+    console.log("第四个矩形的转换属性是："+rect3.transform());
+</script>
+</body>
+</html>

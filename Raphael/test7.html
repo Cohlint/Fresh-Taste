@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raphael Test</title>
+</head>
+<body>
+<div id="my-canvas" style="width:10px;height: 10px;position: fixed; left:20px;top:20px;z-index: 0">
+</div>
+
+<script src="raphael.min.js"></script>
+<script>
+    var paper = Raphael("my-canvas", 650, 400);
+    var cir = paper.circle(50, 50, 50).attr({
+        "fill": "green",
+        "stroke": "red" // border color of the rectangle
+    });
+    var newcir = cir.clone().attr({
+        "fill": "yellow"
+    }).transform("t100,100");
+    var bbox = newcir.getBBox();
+    var bboxOld = newcir.getBBox(true);
+    //我们通过获得的包围盒来绘制包裹圆的矩形
+    paper.rect(bbox.x, bbox.y, bbox.width, bbox.height).attr({
+        "stroke": "yellow"
+    });
+    paper.rect(bboxOld.x, bboxOld.y, bboxOld.width, bboxOld.height).attr({
+        "stroke": "purple"
+    });
+</script>
+</body>
+</html>
